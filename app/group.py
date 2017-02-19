@@ -57,6 +57,8 @@ def add_user_to_group():
 def find_users_group():
     username = request.args.get('username')
     user = db.users.find_one({"username": username})
+    if "group" not in user:
+        return "no group"
     group_id = user['group']
     group = db.groups.find_one({"_id": ObjectId(group_id)})
     if(group):
