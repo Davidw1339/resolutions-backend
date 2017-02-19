@@ -52,6 +52,8 @@ def get_resolution():
     username = request.args.get('username')
     user = db.users.find_one({"username": username})
     resolution = user["resolutions"]
+    if(len(resolution) == 0 ):
+        return "poop"
     formatted_json = format_resolution_json(resolution)
 
     if formatted_json:
