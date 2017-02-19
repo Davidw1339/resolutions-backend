@@ -27,7 +27,7 @@ def create_group():
 
     group = db.groups.insert_one(
         {"_id" : group_id,
-        "users": [{username : user["score"]}]
+        "users": [{username : user["score"]}]}
     )
     return str(group_id)
 
