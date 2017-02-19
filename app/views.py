@@ -2,6 +2,7 @@ from flask import Flask, request
 from pymongo import MongoClient
 import json
 from app import app
+import os
 
 # grab mongo db key from the secret text file
 db_url = os.environ.get("MONGODB_URI")
