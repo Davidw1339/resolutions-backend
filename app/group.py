@@ -61,7 +61,17 @@ def find_users_group():
         return "no group"
     group_id = user['group']
     group = db.groups.find_one({"_id": ObjectId(group_id)})
+
+    updated_scores = {"list" : []}
+    for user in group["users"]:
+        username, oldscore = user.items()[0]
+        print username
+        print oldscore
+        db_user = db.users.find_one({"username": username})
+        print db_user
+        updated_scores["list"].append({db_user["username"] : db_user["score"]})
+
     if(group):
-        return json.dumps({"list":group['users']})
+        return json.dumps(updated_scores)
     else:
         return "no group"
