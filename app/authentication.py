@@ -3,9 +3,11 @@ from pymongo import MongoClient
 from app import app
 
 # grab mongo db key from the secret text file
-secret_reader = open("./app/secret_key.txt", 'r');
-db_url = secret_reader.read()
-print db_url
+db_url = os.environ.get("MONGODB_URI")
+if db_url == None:
+    secret_reader = open("./app/secret_key.txt", 'r');
+    db_url = secret_reader.read()
+    print db_url
 client = MongoClient(db_url.strip())
 # client = MongoClient("mongodb://heroku_jvk8p0cg:bmfkj28v7ulnn2c9ptiga42n0n@ds145355.mlab.com:45355/heroku_jvk8p0cg")
 db = client.heroku_jvk8p0cg

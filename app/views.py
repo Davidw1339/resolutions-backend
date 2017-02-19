@@ -4,8 +4,11 @@ import json
 from app import app
 
 # grab mongo db key from the secret text file
-secret_reader = open("./app/secret_key.txt", 'r');
-db_url = secret_reader.read()
+db_url = os.environ.get("MONGODB_URI")
+if db_url == None:
+    secret_reader = open("./app/secret_key.txt", 'r');
+    db_url = secret_reader.read()
+    print db_url
 client = MongoClient(db_url)
 db = client.heroku_jvk8p0cg
 
