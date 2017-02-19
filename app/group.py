@@ -27,7 +27,7 @@ def create_group():
 
     group = db.groups.insert_one(
         {"_id" : group_id,
-        "users": [username]}
+        "users": [{username : user["score"]}]
     )
     return str(group_id)
 
@@ -44,6 +44,16 @@ def add_user_to_group():
 
     group = db.groups.update(
         {"_id" : ObjectId(group_id)},
-        {"$push" : {"users": username} }
+        {"$push" : {"users": {username : user["score"]}} }
     )
     return "success"
+
+@app.route('/find_users_group', methods=['GET'])
+def find_users_group():
+    username = request.args.get('username')
+    user = db.users.find_one({"username": username})
+    group_id = user["_id"]
+    group = db.groups.find_one({"_id": group_id})
+
+
+    return "hi"

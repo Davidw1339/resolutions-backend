@@ -79,18 +79,16 @@ def valid_check_in():
     formatted_resolution = format_resolution_json(resolution)
 
     current_latitude = request.form['latitude']
-    current_longitude = request.form['latitude']
+    current_longitude = request.form['longitude']
     now = datetime.now()
     day_of_week = now.weekday()
 
     geolocator = Nominatim()
-    current_point = geopy.Point(latitude=current_latitude, longitude=current_longitude)
-    resultion_point = geopy.Point(latitude=resolution['latitude'], longitude=resolution['longitude'])
+    #current_point = geopy.Point(latitude=current_latitude, longitude=current_longitude)
+    #resolution_point = geopy.Point(latitude=resolution['latitude'], longitude=resolution['longitude'])
 
     if day_of_week in formatted_resolution["days"]:
-        print "day of week found: " + day_of_week
-        if vincenty(current_point, resultion_point).miles < 0.25:
-            print vincenty(current_point, resultion_point).miles
+        if vincenty((current_latitude, current_longitude), (resolution['latitude'], resolution['longitude'])).miles < 0.25:
             user = db.users.update(
                 {'username': username},
                 {"$inc" : {"score": 1}},
