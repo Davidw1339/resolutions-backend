@@ -41,15 +41,17 @@ def add_user_to_group():
 
     user = db.users.update(
         {'username': username},
-        {"$set" : {"group": ObjectId(group_id)}},
+        {"$set" : {"group": ObjectId(group_id), "score": 0}},
     )
 
     user = db.users.find_one({"username": username})
+    if user == None:
+        return "user not found"
     group = db.groups.update(
         {"_id" : ObjectId(group_id)},
         {"$push" : {"users": {username: user["score"]}} }
     )
-    return "success"
+    return "user found"
 
 @app.route('/find_users_group', methods=['GET'])
 def find_users_group():

@@ -2,7 +2,7 @@ from flask import Flask, request
 from pymongo import MongoClient
 from app import app
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import geopy
 from geopy.distance import vincenty
 from geopy.geocoders import Nominatim
@@ -82,18 +82,21 @@ def valid_check_in():
 
     current_latitude = request.form['latitude']
     current_longitude = request.form['longitude']
-    now = datetime.now()
-    day_of_week = now.weekday()
+    current_checkin = datetime.now()
+    day_of_week = current_checkin.weekday()
 
-    geolocator = Nominatim()
-    #current_point = geopy.Point(latitude=current_latitude, longitude=current_longitude)
-    #resolution_point = geopy.Point(latitude=resolution['latitude'], longitude=resolution['longitude'])
+    if user["last_checkin"] is None:
+        min_checkin = current_checkin - timedelta(1)
+    else:
+        min_checkin = user["last_checkin"] +  timedelta(days=1)
 
-    if day_of_week in formatted_resolution["days"]:
-        if vincenty((current_latitude, current_longitude), (resolution['latitude'], resolution['longitude'])).miles < 0.25:
-            user = db.users.update(
-                {'username': username},
-                {"$inc" : {"score": 1}},
-            )
-            return "valid"
+    if current_checkin >= min_checkin:
+        if day_of_week in formatted_resolution["days"]:
+            if vincenty((current_latitude, current_longitude), (resolution['latitude'], resolution['longitude'])).miles < 0.25:
+                user = db.users.update(
+                    {'username': username},
+                    {"$inc" : {"score": 1},
+                    "$set" : {"last_checkin" : current_checkin}}
+                )
+                return "valid"
     return "invalid"
