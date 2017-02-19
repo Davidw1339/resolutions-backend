@@ -25,9 +25,11 @@ def create_group():
         {"$set" : {"group": ObjectId(group_id)}},
     )
 
+    user = db.users.find_one({"username": username})
     group = db.groups.insert_one(
         {"_id" : group_id,
-        "users": [{username : user["score"]}]}
+        "users": [{username : user["score"]}]
+        }
     )
     return str(group_id)
 
@@ -42,9 +44,10 @@ def add_user_to_group():
         {"$set" : {"group": ObjectId(group_id)}},
     )
 
+    user = db.users.find_one({"username": username})
     group = db.groups.update(
         {"_id" : ObjectId(group_id)},
-        {"$push" : {"users": {username : user["score"]}} }
+        {"$push" : {"users": {username: user["score"]}} }
     )
     return "success"
 
@@ -52,8 +55,9 @@ def add_user_to_group():
 def find_users_group():
     username = request.args.get('username')
     user = db.users.find_one({"username": username})
-    group_id = user["_id"]
-    group = db.groups.find_one({"_id": group_id})
-
-
-    return "hi"
+    group_id = user['group']
+    group = db.groups.find_one({"_id": ObjectId(group_id)})
+    if(group):
+        return json.dumps({"list":group['users']})
+    else:
+        return "no group"
