@@ -4,11 +4,14 @@ from app import app
 
 from datetime import datetime
 from geopy.geocoders import Nominatim
+import os
 
 # grab mongo db key from the secret text file
-secret_reader = open("./app/secret_key.txt", 'r');
-db_url = secret_reader.read()
-print db_url
+db_url = os.environ.get("MONGODB_URI")
+if db_url == None:
+    secret_reader = open("./app/secret_key.txt", 'r');
+    db_url = secret_reader.read()
+    print db_url
 client = MongoClient(db_url.strip())
 
 @app.route('/create', methods=['POST'])
@@ -33,7 +36,7 @@ def create():
 
     user = mongo.db.users.update(
         {'username': username},
-        { "$push": { resolutions: new_res} }
+        { "$push" : { resolutions: new_res} }
     )
 
 
