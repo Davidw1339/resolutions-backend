@@ -27,7 +27,8 @@ def register():
     user = db.users.insert_one(
     {
         "username": username,
-        "password": password
+        "password": password,
+        "resolutions" : []
     })
     if user:
         return "success"
