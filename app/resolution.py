@@ -4,18 +4,15 @@ from app import app
 
 from datetime import datetime
 import geopy
+from geopy.distance import vincenty
 from geopy.geocoders import Nominatim
 import os
 import json
+import db_connection
+
 
 # grab mongo db key from the secret text file
-db_url = os.environ.get("MONGODB_URI")
-if db_url == None:
-    secret_reader = open("./app/secret_key.txt", 'r');
-    db_url = secret_reader.read()
-    print db_url
-client = MongoClient(db_url.strip())
-db = client.heroku_jvk8p0cg
+db = db_connection.establish_connection()
 
 @app.route('/create_resolution', methods=['POST'])
 def create_resolution():
@@ -36,8 +33,8 @@ def create_resolution():
 
     new_res = {"resolution": resolution,
                 "location": location,
-                #"longitude": longitude,
-                #"latitude": latitude,
+                "longitude": longitude,
+                "latitude": latitude,
                 "days": days.split(),
                 "start_time": datetime_time_start,
                 "end_time": datetime_time_end,
@@ -65,6 +62,8 @@ def get_resolution():
 def format_resolution_json(resolution):
     formatted_json = {"resolution": resolution["resolution"],
                     "location": resolution["location"],
+                    "longitude": float(resolution["longitude"]),
+                    "latitude": float(resolution["latitude"]),
                     "days": [int(x) for x in resolution["days"]],
                     "start_time": '{:%I:%M%p}'.format(resolution["start_time"]),
                     "end_time": '{:%I:%M%p}'.format(resolution["end_time"])
@@ -72,24 +71,29 @@ def format_resolution_json(resolution):
     return formatted_json
 
 
-@app.route('/valid_check_in', methods=['GET'])
+@app.route('/valid_check_in', methods=['POST'])
 def valid_check_in():
-    username = request.args.get('username')
+    username = request.form['username']
     user = db.users.find_one({"username": username})
     resolution = user["resolutions"]
     formatted_resolution = format_resolution_json(resolution)
 
-    current_latitude = request.args.get('latitude')
-    current_longitude = request.args.get('longitude')
+    current_latitude = request.form['latitude']
+    current_longitude = request.form['latitude']
     now = datetime.now()
     day_of_week = now.weekday()
 
     geolocator = Nominatim()
-    point = geopy.Point(latitude=current_latitude, longitude=current_longitude)
-    location, (longit, latit) = geolocator.reverse(point)
+    current_point = geopy.Point(latitude=current_latitude, longitude=current_longitude)
+    resultion_point = geopy.Point(latitude=resolution['latitude'], longitude=resolution['longitude'])
 
-    if(day_of_week in formatted_resolution["days"]):
-        if(location == formatted_resolution["location"]):
-            if resolution["start_time"] < now < resolution["start_end"]:
-                return "valid"
+    if day_of_week in formatted_resolution["days"]:
+        print "day of week found: " + day_of_week
+        if vincenty(current_point, resultion_point).miles < 0.25:
+            print vincenty(current_point, resultion_point).miles
+            user = db.users.update(
+                {'username': username},
+                {"$inc" : {"score": 1}},
+            )
+            return "valid"
     return "invalid"

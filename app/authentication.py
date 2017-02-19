@@ -2,16 +2,11 @@ from flask import Flask, request
 from pymongo import MongoClient
 from app import app
 import os
+import db_connection
+
 
 # grab mongo db key from the secret text file
-db_url = os.environ.get("MONGODB_URI")
-if db_url == None:
-    secret_reader = open("./app/secret_key.txt", 'r');
-    db_url = secret_reader.read()
-    print db_url
-client = MongoClient(db_url.strip())
-# client = MongoClient("mongodb://heroku_jvk8p0cg:bmfkj28v7ulnn2c9ptiga42n0n@ds145355.mlab.com:45355/heroku_jvk8p0cg")
-db = client.heroku_jvk8p0cg
+db = db_connection.establish_connection()
 
 @app.route('/test')
 def test():
@@ -30,7 +25,8 @@ def register():
     user = db.users.insert_one(
     {
         "username": username,
-        "password": password
+        "password": password,
+        "score": 0
     })
     if user:
         return "success"
