@@ -27,7 +27,7 @@ def register():
         "username": username,
         "password": password,
         "score": 0,
-        "resolution" : ""
+        "resolutions" : ""
     })
     if user:
         return "success"
