@@ -7,19 +7,9 @@ from app import app
 secret_reader = open("./app/secret_key.txt", 'r');
 db_url = secret_reader.read()
 client = MongoClient(db_url)
+db = client.heroku_jvk8p0cg
 
 # static url
 @app.route('/')
 def index():
-    return "Hello, World!"
-
-# url parameters
-@app.route('/endpoint/<input>')
-def endpoint(input):
-    return input
-
-# api with endpoint
-@app.route('/nameEndpoint', methods=['GET'])
-def nameEndpoint():
-    if 'name' in request.args:
-    	return 'My name is ' + request.args['name']
+    return "Hi dudes (and dudettes), check out my insta!"
